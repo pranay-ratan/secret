@@ -413,9 +413,9 @@ class StudentVerifier {
 
         let checkedIn = 0;
 
-        // Process comma-separated IDs
+        // Process space-separated IDs
         if (idsText) {
-            const ids = idsText.split(',').map(id => id.trim()).filter(id => id);
+            const ids = idsText.split(' ').map(id => id.trim()).filter(id => id);
             ids.forEach(id => {
                 const student = this.students.find(s => s.id === id);
                 if (student && !this.verifiedStudents.has(student.id)) {
@@ -461,9 +461,9 @@ class StudentVerifier {
 
         let checkedOut = 0;
 
-        // Process comma-separated IDs
+        // Process space-separated IDs
         if (idsText) {
-            const ids = idsText.split(',').map(id => id.trim()).filter(id => id);
+            const ids = idsText.split(' ').map(id => id.trim()).filter(id => id);
             ids.forEach(id => {
                 const student = this.students.find(s => s.id === id);
                 if (student && this.verifiedStudents.has(student.id)) {
