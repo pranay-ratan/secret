@@ -415,9 +415,14 @@ class StudentVerifier {
 
         // Process space-separated IDs
         if (idsText) {
-            const ids = idsText.split(' ').map(id => id.trim()).filter(id => id);
+            const ids = idsText.split(/\s+/).map(id => id.trim()).filter(id => id);
             ids.forEach(id => {
-                const student = this.students.find(s => s.id === id);
+                const student = this.students.find(s =>
+                    s.id === id ||
+                    s.id === id.padStart(9, '0') ||
+                    s.id.endsWith(id) ||
+                    id === s.id
+                );
                 if (student && !this.verifiedStudents.has(student.id)) {
                     this.verifyStudent(student);
                     checkedIn++;
@@ -463,9 +468,14 @@ class StudentVerifier {
 
         // Process space-separated IDs
         if (idsText) {
-            const ids = idsText.split(' ').map(id => id.trim()).filter(id => id);
+            const ids = idsText.split(/\s+/).map(id => id.trim()).filter(id => id);
             ids.forEach(id => {
-                const student = this.students.find(s => s.id === id);
+                const student = this.students.find(s =>
+                    s.id === id ||
+                    s.id === id.padStart(9, '0') ||
+                    s.id.endsWith(id) ||
+                    id === s.id
+                );
                 if (student && this.verifiedStudents.has(student.id)) {
                     this.removeStudent(student.id);
                     checkedOut++;
