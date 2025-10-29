@@ -37,6 +37,14 @@ class StudentVerifier {
         this.exportCSVBtn = document.getElementById('exportCSVBtn');
         this.addZoomParticipantsBtn = document.getElementById('addZoomParticipantsBtn');
         this.zoomParticipants = document.getElementById('zoomParticipants');
+
+        // Bulk check-in/check-out elements
+        this.bulkCheckInBtn = document.getElementById('bulkCheckInBtn');
+        this.bulkCheckInIds = document.getElementById('bulkCheckInIds');
+        this.bulkCheckInNames = document.getElementById('bulkCheckInNames');
+        this.bulkCheckOutBtn = document.getElementById('bulkCheckOutBtn');
+        this.bulkCheckOutIds = document.getElementById('bulkCheckOutIds');
+        this.bulkCheckOutNames = document.getElementById('bulkCheckOutNames');
     }
 
     bindEvents() {
@@ -66,6 +74,10 @@ class StudentVerifier {
 
         // Zoom participants
         this.addZoomParticipantsBtn.addEventListener('click', () => this.addZoomParticipants());
+
+        // Bulk check-in/check-out
+        this.bulkCheckInBtn.addEventListener('click', () => this.bulkCheckIn());
+        this.bulkCheckOutBtn.addEventListener('click', () => this.bulkCheckOut());
 
         // Remove student - event delegation
         this.verifiedStudentsDiv.addEventListener('click', (e) => {
@@ -387,6 +399,102 @@ class StudentVerifier {
             this.zoomParticipants.value = '';
         } else {
             showNotification('No new participants found to add', 'warning');
+        }
+    }
+
+    bulkCheckIn() {
+        const idsText = this.bulkCheckInIds.value.trim();
+        const namesText = this.bulkCheckInNames.value.trim();
+
+        if (!idsText && !namesText) {
+            showNotification('Please enter student IDs or names to check in', 'warning');
+            return;
+        }
+
+        let checkedIn = 0;
+
+        // Process comma-separated IDs
+        if (idsText) {
+            const ids = idsText.split(',').map(id => id.trim()).filter(id => id);
+            ids.forEach(id => {
+                const student = this.students.find(s => s.id === id);
+                if (student && !this.verifiedStudents.has(student.id)) {
+                    this.verifyStudent(student);
+                    checkedIn++;
+                }
+            });
+        }
+
+        // Process comma-separated names
+        if (namesText) {
+            const names = namesText.split(',').map(name => name.trim()).filter(name => name);
+            names.forEach(name => {
+                const student = this.students.find(s =>
+                    s.displayName.toLowerCase() === name.toLowerCase() ||
+                    s.displayName.toLowerCase().includes(name.toLowerCase()) ||
+                    (s['Preferred First Name'] + ' ' + s['Primary Last Name']).toLowerCase() === name.toLowerCase()
+                );
+                if (student && !this.verifiedStudents.has(student.id)) {
+                    this.verifyStudent(student);
+                    checkedIn++;
+                }
+            });
+        }
+
+        if (checkedIn > 0) {
+            showNotification(`Bulk check-in completed: ${checkedIn} students added`, 'success');
+            this.bulkCheckInIds.value = '';
+            this.bulkCheckInNames.value = '';
+        } else {
+            showNotification('No new students found to check in', 'warning');
+        }
+    }
+
+    bulkCheckOut() {
+        const idsText = this.bulkCheckOutIds.value.trim();
+        const namesText = this.bulkCheckOutNames.value.trim();
+
+        if (!idsText && !namesText) {
+            showNotification('Please enter student IDs or names to check out', 'warning');
+            return;
+        }
+
+        let checkedOut = 0;
+
+        // Process comma-separated IDs
+        if (idsText) {
+            const ids = idsText.split(',').map(id => id.trim()).filter(id => id);
+            ids.forEach(id => {
+                const student = this.students.find(s => s.id === id);
+                if (student && this.verifiedStudents.has(student.id)) {
+                    this.removeStudent(student.id);
+                    checkedOut++;
+                }
+            });
+        }
+
+        // Process comma-separated names
+        if (namesText) {
+            const names = namesText.split(',').map(name => name.trim()).filter(name => name);
+            names.forEach(name => {
+                const student = this.students.find(s =>
+                    s.displayName.toLowerCase() === name.toLowerCase() ||
+                    s.displayName.toLowerCase().includes(name.toLowerCase()) ||
+                    (s['Preferred First Name'] + ' ' + s['Primary Last Name']).toLowerCase() === name.toLowerCase()
+                );
+                if (student && this.verifiedStudents.has(student.id)) {
+                    this.removeStudent(student.id);
+                    checkedOut++;
+                }
+            });
+        }
+
+        if (checkedOut > 0) {
+            showNotification(`Bulk check-out completed: ${checkedOut} students removed`, 'success');
+            this.bulkCheckOutIds.value = '';
+            this.bulkCheckOutNames.value = '';
+        } else {
+            showNotification('No students found to check out', 'warning');
         }
     }
 
