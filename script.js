@@ -412,6 +412,7 @@ class StudentVerifier {
         }
 
         let checkedIn = 0;
+        const notFound = { ids: [], names: [] };
 
         // Process space-separated IDs
         if (idsText) {
@@ -426,6 +427,8 @@ class StudentVerifier {
                 if (student && !this.verifiedStudents.has(student.id)) {
                     this.verifyStudent(student);
                     checkedIn++;
+                } else {
+                    notFound.ids.push(id);
                 }
             });
         }
@@ -442,16 +445,28 @@ class StudentVerifier {
                 if (student && !this.verifiedStudents.has(student.id)) {
                     this.verifyStudent(student);
                     checkedIn++;
+                } else {
+                    notFound.names.push(name);
                 }
             });
         }
 
         if (checkedIn > 0) {
-            showNotification(`Bulk check-in completed: ${checkedIn} students added`, 'success');
+            let message = `Bulk check-in completed: ${checkedIn} students added`;
+            if (notFound.ids.length > 0 || notFound.names.length > 0) {
+                const notFoundList = [...notFound.ids, ...notFound.names];
+                message += `\n\nNot found: ${notFoundList.join(', ')}`;
+            }
+            showNotification(message, 'success');
             this.bulkCheckInIds.value = '';
             this.bulkCheckInNames.value = '';
         } else {
-            showNotification('No new students found to check in', 'warning');
+            if (notFound.ids.length > 0 || notFound.names.length > 0) {
+                const notFoundList = [...notFound.ids, ...notFound.names];
+                showNotification(`No students found to check in. Not found: ${notFoundList.join(', ')}`, 'error');
+            } else {
+                showNotification('No new students found to check in', 'warning');
+            }
         }
     }
 
@@ -465,6 +480,7 @@ class StudentVerifier {
         }
 
         let checkedOut = 0;
+        const notFound = { ids: [], names: [] };
 
         // Process space-separated IDs
         if (idsText) {
@@ -479,6 +495,8 @@ class StudentVerifier {
                 if (student && this.verifiedStudents.has(student.id)) {
                     this.removeStudent(student.id);
                     checkedOut++;
+                } else {
+                    notFound.ids.push(id);
                 }
             });
         }
@@ -495,16 +513,28 @@ class StudentVerifier {
                 if (student && this.verifiedStudents.has(student.id)) {
                     this.removeStudent(student.id);
                     checkedOut++;
+                } else {
+                    notFound.names.push(name);
                 }
             });
         }
 
         if (checkedOut > 0) {
-            showNotification(`Bulk check-out completed: ${checkedOut} students removed`, 'success');
+            let message = `Bulk check-out completed: ${checkedOut} students removed`;
+            if (notFound.ids.length > 0 || notFound.names.length > 0) {
+                const notFoundList = [...notFound.ids, ...notFound.names];
+                message += `\n\nNot removed: ${notFoundList.join(', ')}`;
+            }
+            showNotification(message, 'success');
             this.bulkCheckOutIds.value = '';
             this.bulkCheckOutNames.value = '';
         } else {
-            showNotification('No students found to check out', 'warning');
+            if (notFound.ids.length > 0 || notFound.names.length > 0) {
+                const notFoundList = [...notFound.ids, ...notFound.names];
+                showNotification(`No students found to check out. Not found: ${notFoundList.join(', ')}`, 'error');
+            } else {
+                showNotification('No students found to check out', 'warning');
+            }
         }
     }
 
